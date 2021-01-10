@@ -1,8 +1,17 @@
-import itertools
 import sys
+import itertools
+import argparse
 from typing import Tuple
-import numpy as np
 from scipy.spatial.distance import hamming
+
+
+def parse_args():
+	parser = argparse.ArgumentParser()
+	parser.add_argument('--first_barcode', '-c', help='number of barcodes', type=str, required=True)
+	parser.add_argument('--min_dist', '-s', help='minimum hamming distance among barcodes', type=int, required=True)
+	parser.add_argument('--restrict_sites', '-r', help='restriction cutsites to exclude from barcodes', type=str, nargs="*", required=False)
+	
+	return parser.parse_args()
 
 
 def generate_combinations(n:int) -> list:
@@ -21,16 +30,8 @@ def generate_combinations(n:int) -> list:
 	# Return all possible combinations
 	return [p for p in itertools.product(*list_lists)]
 	
-	
-def filter_barcodes(first_bc:Tuple, combinations:list, min_dist:int, restriction_cutsites:Tuple=()):
-	"""
-	"""
-	
-	# Confirm initialized barcode is appropriate for combinations provided
-	if not len(first_bc) == len(combinations[0]):
-		sys.exit("Error! Number of bases in first barcode must match number of bases in \
-		provided combinations")
-	
+
+def filter_by_hamming(first_bc:str, combinations:Tuple, min_dist:int)->list:
 	# Initialize the first barcode.
 	final = list([tuple(first_bc)])
 	
@@ -44,19 +45,60 @@ def filter_barcodes(first_bc:Tuple, combinations:list, min_dist:int, restriction
 			if not any(x < min_dist for x in hdists):
 				final = final + [combinations[i]]
 	
-	print(len(final))
-	
+	return final
+
+
+def flatten_barcodes(barcodes:list):
 	# Flatten list to make barcodes easier to read
-	with open('barcodes_for_use.csv', mode="w") as outfile:
-		for bc in final:
-			joined = ''.join(bc)
-			
-			# Check that the barcode does not contain any of the specified cut sites!
-			if not any(x in joined for x in restriction_cutsites):
-				# Write each barcode as a new line
-				outfile.write("%s\n" % joined)
+	flattened = []
+	
+	for bc in barcodes:
+		joined = ''.join(bc)
+		flattened = flattened + [joined]
+	
+	return flattened
 		
 
-c = generate_combinations(n=6)
+def filter_restriction_sites(barcodes:list, restriction_cutsites:list):
+	# Remove restriction sites
+	res_removed = []
+	
+	# Check that the barcode does not contain any of the specified cut sites!
+	for bc in barcodes:
+		if not any(x in bc for x in restriction_cutsites):
+			res_removed = res_removed + [bc]
+	
+	return res_removed
+	
+	
+def write_barcodes(barcodes:list, outfile:str):
+	# Write barcodes
+	with open(outfile, mode="w") as outfile:
+		for bc in barcodes:
+			outfile.write("%s\n" % bc)
+			
 
-filter_barcodes(first_bc='AACCCG', combinations=c, min_dist=3, restriction_cutsites=('CCGG','CTGCAG'))
+def main():
+	"""
+	Wrapper to run the whole thing
+	"""
+	
+	args = parse_args()
+	
+	# Generate list of possible barcodes given the length of what's provided
+	combinations = generate_combinations(n = len(args.first_barcode))
+	
+	# Generate hamming distance limited list of barcodes
+	hamming_bcs = filter_by_hamming(first_bc = args.first_barcode, combinations = combinations, min_dist = args.min_dist)
+	
+	flat_bcs = flatten_barcodes(barcodes = hamming_bcs)
+	
+	res_removed_bcs = filter_restriction_sites(barcodes = flat_bcs, restriction_cutsites = args.restrict_sites)
+
+	print(len(res_removed_bcs),"barcodes retained, with",len(flat_bcs)-len(res_removed_bcs),"excluded\
+	due to restriction cut sites.")
+	
+	
+if __name__ == "__main__":
+	main()
+	
