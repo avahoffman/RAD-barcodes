@@ -1,4 +1,5 @@
 import itertools
+import sys
 from typing import Tuple
 import numpy as np
 from scipy.spatial.distance import hamming
@@ -21,12 +22,17 @@ def generate_combinations(n:int) -> list:
 	return [p for p in itertools.product(*list_lists)]
 	
 	
-def filter_barcodes(first_bc: Tuple, combinations:list, min_dist:int):
+def filter_barcodes(first_bc:Tuple, combinations:list, min_dist:int, restriction_cutsites:Tuple=()):
 	"""
 	"""
 	
+	# Confirm initialized barcode is appropriate for combinations provided
+	if not len(first_bc) == len(combinations[0]):
+		sys.exit("Error! Number of bases in first barcode must match number of bases in \
+		provided combinations")
+	
 	# Initialize the first barcode.
-	final = list([first_bc])
+	final = list([tuple(first_bc)])
 	
 	# Iterate
 	for i in range(len(combinations)):
@@ -44,9 +50,13 @@ def filter_barcodes(first_bc: Tuple, combinations:list, min_dist:int):
 	with open('barcodes_for_use.csv', mode="w") as outfile:
 		for bc in final:
 			joined = ''.join(bc)
-			outfile.write("%s\n" % joined)
+			
+			# Check that the barcode does not contain any of the specified cut sites!
+			if not any(x in joined for x in restriction_cutsites):
+				# Write each barcode as a new line
+				outfile.write("%s\n" % joined)
 		
 
 c = generate_combinations(n=6)
 
-filter_barcodes(first_bc=('A', 'A', 'C', 'C', 'C', 'G'), combinations=c, min_dist=3)
+filter_barcodes(first_bc='AACCCG', combinations=c, min_dist=3, restriction_cutsites=('CCGG','CTGCAG'))
