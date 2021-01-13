@@ -9,9 +9,18 @@
 
 ### Barcode combinations using `barcode_combinations.py`
 
-This tool aims to remove problematic effects of [index hopping](https://www.illumina.com/techniques/sequencing/ngs-library-prep/multiplexing/index-hopping.html) on Illumina sequencers. In brief, sample barcodes can "hop" to a different sample, meaning some reads are misidentified. When large numbers of samples are barcoded and pooled, risk of index hopping increases. To avoid this (and avoid having to throw out valuable sequencing data!), Illumina recommends at least two unique barcodes per sample. This is much easier if you are using a 4 barcode approach ("inner" *and* "outer" barcodes), such as described by [Franchini et al. 2017](https://doi.org/10.1111/mec.14077). 
+This tool aims to remove problematic effects of [index hopping](https://www.illumina.com/techniques/sequencing/ngs-library-prep/multiplexing/index-hopping.html) on Illumina sequencers. In brief, sample barcodes can "hop" to a different sample, meaning some reads are misidentified. When large numbers of samples are barcoded and pooled, risk of index hopping increases. To avoid having to throw out valuable sequencing data, Illumina recommends at least two unique barcodes per sample. This is much more affordable if you are using a 4-barcode approach ("inner" *and* "outer" barcodes), such as described by [Franchini et al. 2017](https://doi.org/10.1111/mec.14077). 
 
-Here is an example. Let's say you have 2 unique barcodes each of your inner (i5 and i7) and outer (i5nn and i7nn) barcodes. If you only care that combinations are unique, you'd get ![2^4](https://render.githubusercontent.com/render/math?math=2%5E4) = 16 barcodes.. but this could lead to index hopping if you had more samples in a sequencing lane. This script filters barcode combinations that have a Hamming distance of less than 2. So in the previous example, combination 1112 (1st of i5, i7, i5nn, and second i7nn) would be excluded as too similar to 1111 (1st of all barcodes). Hamming distance for that example is only =1. Hamming distance between 1111 and 1122 =2 though, so it's good!
+Here's an example. Let's say you have 2 unique i5 barcodes (A, B), i7 barcodes (C, D), i5nn barcodes (E, F), and i7nn barcodes (G, H). If you only care that combinations are unique, you'd get ![2^4](https://render.githubusercontent.com/render/math?math=2%5E4) = 16 barcodes. **However** this means some samples share all but one barcode, leading to greater risk of index hopping. A better approach would be one that ensures at least two barcodes differ.
+
+This script filters barcode combinations that have a Hamming distance of less than 2 when compared to the first barcode (with strikethrough):
+
+|   | AC  | AD  | BC  | BD  |
+|---|---|---|---|---|
+| **EG**  | ACEG  | <s>ADEG  | <s>BCEG  | BDEG  |
+| **EH**  | <s>ACEH  | ADEH  | BCEH  | <s>BDEH  |
+| **FG**  | <s>ACFG  | ADFG  | BCFG  | <s>BDFG  |
+| **FH**  | ACFH  | <s>ADFH  | <s>BCFH  | BDFH  |
 
 #### Usage
 
@@ -26,10 +35,18 @@ The generator will write an array of combinations that you can assign to samples
 
 ### Barcode generator using `barcode_sequences.py`
 
+This tool aims to generate unqiue barcodes given a "seed" barcode to begin building. The generator assumes normal bases (A, C, G, T) and barcodes of the same length. Any other filtering (such as GC content) can be done by the user on the output file.
+
+There are a few inputs to consider:
+  - Minimum Hamming distance (how dissimilar should your barcodes be?) 
+  - Restriction sites (you want to steer clear of barcodes that can be digested!)
+
+
+
 #### Useage
 
 ```
-python barcode_sequences.py --first_barcode <..> --min_dist <..> --restrict_sites <site1 site2>
+python barcode_sequences.py --first_barcode <barcode sequence> --min_dist <minimum Hamming dist> --restrict_sites <site1 site2>
 ```
 e.g.:
 ```
