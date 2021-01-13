@@ -19,21 +19,23 @@ def parse_args():
     parser.add_argument(
         "--min_dist",
         "-d",
-        help="Minimum hamming distance among barcodes. E.g: <3> would indicate barcodes need to differ by at least 3 bases",
+        help="Minimum hamming distance among barcodes. E.g: <3> would indicate barcodes need to differ by at least 3 "
+             "bases",
         type=int,
         required=True,
     )
     parser.add_argument(
         "-outfile",
         "-o",
-        help="File to which barcodes will be written. E.g.: 'Barcodes_out.csv' ",
+        help="File to which barcodes will be written. Should be .csv. E.g.: 'Barcodes_out.csv' ",
         type=str,
         required=True,
     )
     parser.add_argument(
         "--restrict_sites",
         "-r",
-        help="Restriction cutsites to exclude from barcodes. These should be 5'->3' and can also be left blank. E.g.: CCGG",
+        help="Restriction cutsites to exclude from barcodes. These should be 5'->3' and can also be left blank. E.g.: "
+             "CCGG",
         type=str,
         nargs="*",
         required=False,
@@ -96,7 +98,7 @@ def filter_by_hamming(first_bc: str, combinations: list, min_dist: int) -> list:
     return final
 
 
-def flatten_barcodes(barcodes: list):
+def flatten_barcodes(barcodes: list) -> list:
     """
     This function 'flattens' the list of barcodes, making them easier to read, e.g.:
     ['A','A','C','G'] -> ['AACG']
@@ -114,7 +116,7 @@ def flatten_barcodes(barcodes: list):
     return flattened
 
 
-def filter_restriction_sites(barcodes: list, restriction_cutsites: list):
+def filter_restriction_sites(barcodes: list, restriction_cutsites: list) -> list:
     """
     This function filters out any barcodes that contain a restriction enzyme cut site -
     check the enzymes being used in your reactions!! Cut sites should be given 5'->3'.
@@ -139,7 +141,27 @@ def filter_restriction_sites(barcodes: list, restriction_cutsites: list):
     return res_removed
 
 
-def write_barcodes(barcodes: list, outfile: str):
+def make_reverse_compliment(barcodes: list) -> list:
+    """
+    This function takes a list of flattened and filtered barcodes and designs the reverse compliment.
+    barcodes: list of barcodes (should be list of strings ['ACGT','ACTA',...])
+
+    returns: list of reverse compliments
+    """
+    base_dict = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
+
+    bc_list = []
+    for bc in barcodes:
+        rev = bc[::-1]
+        rev_comp = ''
+        for base in rev:
+            rev_comp += base_dict[base]
+        bc_list += [rev_comp]
+
+    return bc_list
+
+
+def write_barcodes(barcodes: list, outfile: str, compliments: list=None):
     """
     This function writes the list of barcodes to specified file.
     outfile: file write path
@@ -147,8 +169,12 @@ def write_barcodes(barcodes: list, outfile: str):
     returns: barcodes written to file
     """
     with open(outfile, mode="w") as outfile:
-        for bc in barcodes:
-            outfile.write("%s\n" % bc)
+        if not compliments:
+            for bc in barcodes:
+                outfile.write("%s\n" % bc)
+        else:
+            for bc, comp in zip(barcodes, compliments):
+                outfile.write(str(bc) + "," + str(comp) + "\n")
 
 
 def main():
@@ -172,7 +198,9 @@ def main():
         barcodes=flat_bcs, restriction_cutsites=args.restrict_sites
     )
 
-    write_barcodes(barcodes=res_removed_bcs, outfile=args.outfile)
+    res_compliments = make_reverse_compliment(res_removed_bcs)
+
+    write_barcodes(barcodes=res_removed_bcs, outfile=args.outfile, compliments=res_compliments)
 
     print(
         len(res_removed_bcs),
