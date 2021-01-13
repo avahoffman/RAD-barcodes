@@ -51,11 +51,11 @@ python barcode_sequences.py --first_barcode <barcode sequence> --min_dist <minim
 ```
 e.g.:
 ```
-python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 \
+$ python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 \
 --outfile 'bc_out.csv' --restrict_sites CCGG CTGCAG
 ```
 Note that excluding restriction enzyme cut sites with ``--restrict_sites`` is optional, and no filtering will occur if the ``--restrict_sites`` argument is empty, e.g.:
 ```
-python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 \
+$ python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 \
 --outfile 'bc_out.csv' --restrict_sites
 ```
