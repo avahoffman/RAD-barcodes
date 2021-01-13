@@ -10,19 +10,30 @@ def parse_args():
     """
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--first_barcode", "-c", help="number of barcodes", type=str, required=True
+        "--first_barcode",
+        "-b",
+        help="String representing the first barcode. E.g.: 'AACCCG' ",
+        type=str,
+        required=True,
     )
     parser.add_argument(
         "--min_dist",
-        "-s",
-        help="minimum hamming distance among barcodes",
+        "-d",
+        help="Minimum hamming distance among barcodes. E.g: <3> would indicate barcodes need to differ by at least 3 bases",
         type=int,
+        required=True,
+    )
+    parser.add_argument(
+        "-outfile",
+        "-o",
+        help="File to which barcodes will be written. E.g.: 'Barcodes_out.csv' ",
+        type=str,
         required=True,
     )
     parser.add_argument(
         "--restrict_sites",
         "-r",
-        help="restriction cutsites to exclude from barcodes",
+        help="Restriction cutsites to exclude from barcodes. These should be 5'->3' and can also be left blank. E.g.: CCGG",
         type=str,
         nargs="*",
         required=False,
@@ -129,7 +140,12 @@ def filter_restriction_sites(barcodes: list, restriction_cutsites: list):
 
 
 def write_barcodes(barcodes: list, outfile: str):
-    # Write barcodes
+    """
+    This function writes the list of barcodes to specified file.
+    outfile: file write path
+
+    returns: barcodes written to file
+    """
     with open(outfile, mode="w") as outfile:
         for bc in barcodes:
             outfile.write("%s\n" % bc)
@@ -155,6 +171,8 @@ def main():
     res_removed_bcs = filter_restriction_sites(
         barcodes=flat_bcs, restriction_cutsites=args.restrict_sites
     )
+
+    write_barcodes(barcodes=res_removed_bcs, outfile=args.outfile)
 
     print(
         len(res_removed_bcs),

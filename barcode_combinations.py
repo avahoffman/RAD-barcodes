@@ -22,6 +22,13 @@ def parse_args():
     parser.add_argument(
         "--i7nn", help="Number of barcodes of type i7nn", type=int, required=True
     )
+    parser.add_argument(
+        "--outfile",
+        "-o",
+        help="File to which barcodes will be written. E.g.: 'combinations.csv' ",
+        type=str,
+        required=True,
+    )
 
     return parser.parse_args()
 
@@ -54,7 +61,13 @@ def generate_combinations(i5: int, i7: int, i5nn: int, i7nn: int) -> list:
 
 
 def limit_by_hamming_dist(combinations: list):
-    """"""
+    """
+    This function limits the possible barcode combinations so that there is a minimum Hamming distance among them
+    (in this case 2, may make this optional in the future)
+    combinations: list of all possible barcode combinations (numeric lists)
+
+    returns: filtered list of barcode combinations
+    """
 
     # Initialize the final list of barcode combinations with the first possible combo
     final = list([combinations[0]])
@@ -69,10 +82,20 @@ def limit_by_hamming_dist(combinations: list):
             if not any(x < 2 for x in hdists):
                 final = final + [combinations[i]]
 
-    print(len(final))
+    return final
 
-    np_final = np.array(final)
-    np.savetxt("barcode_combinations_out.csv", np_final, delimiter=",")
+
+def write_combinations(barcode_combinations: list, outfile: str):
+    """
+    This function takes the barcode combinations list of lists and converts it to readable numpy array
+    barcode_combinations: Filtered list of barcodes (as lists)
+    outfile: file to write the barcode combinations to
+
+    returns: Barcode combinations written to file, to be used for identifying samples stored in .csv etc.
+    Note that there is no header on the outfile.
+    """
+    np_final = np.array(barcode_combinations)
+    np.savetxt(outfile, np_final, delimiter=",")
 
 
 def main():
@@ -82,9 +105,11 @@ def main():
 
     args = parse_args()
 
-    limit_by_hamming_dist(
+    barcode_list = limit_by_hamming_dist(
         generate_combinations(i5=args.i5, i7=args.i7, i5nn=args.i5nn, i7nn=args.i7nn)
     )
+
+    write_combinations(barcode_combinations=barcode_list, outfile=args.outfile)
 
 
 if __name__ == "__main__":
