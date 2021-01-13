@@ -31,17 +31,15 @@ e.g.:
 ```
 $ python barcode_combinations.py --i5 5 --i7 5 --i5nn 6 --i7nn 6 --outfile 'combinations.csv'
 ```
-The generator will write an array of combinations that you can assign to samples. The number of samples that can be processed with the given barcode scheme will also print to console.
+The generator will write an array of combinations that you can assign to samples. The number of samples that can be processed with the given barcode scheme will also print to console. 
 
 ### Barcode generator using `barcode_sequences.py`
 
-This tool aims to generate unqiue barcodes given a "seed" barcode to begin building. The generator assumes normal bases (A, C, G, T) and barcodes of the same length. Any other filtering (such as GC content) can be done by the user on the output file.
+This tool aims to generate unique barcodes given a "seed" barcode to begin building. The generator assumes normal bases (A, C, G, T) and barcodes of the same length. The output contains barcode sequences in column 1 and reverse compliments in column 2. Any other filtering (such as GC content) can be done by the user on the output file.
 
 There are a few inputs to consider:
   - Minimum Hamming distance (how dissimilar should your barcodes be?) 
   - Restriction sites (you want to steer clear of barcodes that can be digested!)
-
-
 
 #### Usage
 
