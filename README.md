@@ -25,11 +25,11 @@ This script filters barcode combinations that have a Hamming distance of less th
 #### Usage
 
 ```
-python barcode_combinations.py --i5 <int> --i7 <int> --i5nn <int> --i7nn <int>
+python barcode_combinations.py --i5 <int> --i7 <int> --i5nn <int> --i7nn <int> --outfile <filename>
 ```
 e.g.:
 ```
-$ python barcode_combinations.py --i5 5 --i7 5 --i5nn 6 --i7nn 6
+$ python barcode_combinations.py --i5 5 --i7 5 --i5nn 6 --i7nn 6 --outfile 'combinations.csv'
 ```
 The generator will write an array of combinations that you can assign to samples. The number of samples that can be processed with the given barcode scheme will also print to console.
 
@@ -43,16 +43,16 @@ There are a few inputs to consider:
 
 
 
-#### Useage
+#### Usage
 
 ```
-python barcode_sequences.py --first_barcode <barcode sequence> --min_dist <minimum Hamming dist> --restrict_sites <site1 site2>
+python barcode_sequences.py --first_barcode <barcode sequence> --min_dist <minimum Hamming dist> --outfile <filename.csv> --restrict_sites <site1 site2>
 ```
 e.g.:
 ```
-python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 --restrict_sites CCGG CTGCAG
+python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 --outfile 'bc_out.csv' --restrict_sites CCGG CTGCAG
 ```
 Note that excluding restriction enzyme cut sites with ``--restrict_sites`` is optional, and no filtering will occur if the ``--restrict_sites`` argument is empty, e.g.:
 ```
-python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 --restrict_sites
+python barcode_sequences.py --first_barcode 'AACCCG' --min_dist 3 --outfile 'bc_out.csv' --restrict_sites
 ```
