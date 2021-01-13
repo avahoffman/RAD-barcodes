@@ -109,6 +109,8 @@ def main():
         generate_combinations(i5=args.i5, i7=args.i7, i5nn=args.i5nn, i7nn=args.i7nn)
     )
 
+    print(len(barcode_list))
+
     write_combinations(barcode_combinations=barcode_list, outfile=args.outfile)
 
 
