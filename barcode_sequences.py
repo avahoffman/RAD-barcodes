@@ -141,12 +141,12 @@ def filter_restriction_sites(barcodes: list, restriction_cutsites: list) -> list
     return res_removed
 
 
-def make_reverse_compliment(barcodes: list) -> list:
+def make_reverse_complement(barcodes: list) -> list:
     """
-    This function takes a list of flattened and filtered barcodes and designs the reverse compliment.
+    This function takes a list of flattened and filtered barcodes and designs the reverse complement.
     barcodes: list of barcodes (should be list of strings ['ACGT','ACTA',...])
 
-    returns: list of reverse compliments
+    returns: list of reverse complements
     """
     base_dict = {'A': 'T', 'T': 'A', 'G': 'C', 'C': 'G'}
 
@@ -161,7 +161,7 @@ def make_reverse_compliment(barcodes: list) -> list:
     return bc_list
 
 
-def write_barcodes(barcodes: list, outfile: str, compliments: list=None):
+def write_barcodes(barcodes: list, outfile: str, complements: list=None):
     """
     This function writes the list of barcodes to specified file.
     outfile: file write path
@@ -169,11 +169,11 @@ def write_barcodes(barcodes: list, outfile: str, compliments: list=None):
     returns: barcodes written to file
     """
     with open(outfile, mode="w") as outfile:
-        if not compliments:
+        if not complements:
             for bc in barcodes:
                 outfile.write("%s\n" % bc)
         else:
-            for bc, comp in zip(barcodes, compliments):
+            for bc, comp in zip(barcodes, complements):
                 outfile.write(str(bc) + "," + str(comp) + "\n")
 
 
@@ -198,9 +198,9 @@ def main():
         barcodes=flat_bcs, restriction_cutsites=args.restrict_sites
     )
 
-    res_compliments = make_reverse_compliment(res_removed_bcs)
+    res_complements = make_reverse_complement(res_removed_bcs)
 
-    write_barcodes(barcodes=res_removed_bcs, outfile=args.outfile, compliments=res_compliments)
+    write_barcodes(barcodes=res_removed_bcs, outfile=args.outfile, complements=res_complements)
 
     print(
         len(res_removed_bcs),
